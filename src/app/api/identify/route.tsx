@@ -24,10 +24,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize Gemini AI
-    // const genAI = new GoogleGenerativeAI(
-    //   "AIzaSyAx-VM37ARtgVREP4ioH6iIV1Ef54WyzyE",
-    // );
-
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
     console.log("Identifying plant: Step 3 - Gemini AI initialized");
 
@@ -47,14 +43,24 @@ export async function POST(request: NextRequest) {
 
     console.log("Identifying plant: Step 5 - Image parts prepared");
 
-    // Generate content
+    // Generate content with English and Telugu response
     const result = await model.generateContent({
       contents: [
         {
           role: "user",
           parts: [
             {
-              text: "Identify this plant scientifically. Provide the following in a clear format: 1) Scientific Name 2) Common Name 3) Brief Description 4) Habitat",
+              text: `Identify this plant scientifically. Provide the following in a clear format:
+                1) Scientific Name
+                2) Common Name
+                3) Brief Description
+                4) Habitat
+                
+                Also, translate the above information into Telugu and provide in a clear format:
+                5) Telugu Scientific Name
+                6) Telugu Common Name
+                7) Telugu Description
+                8) Telugu Habitat`,
             },
             ...imageParts,
           ],
@@ -72,23 +78,71 @@ export async function POST(request: NextRequest) {
 
     // Parse the response
     const parseResponse = (text: string) => {
-      // Use a more robust parsing method
-      const scientificNameMatch = text.match(/Scientific Name:\s*([^;]+)/i);
-      const commonNameMatch = text.match(/Common Name:\s*([^;]+)/i);
-      const descriptionMatch = text.match(/Description:\s*([^;]+)/i);
-      const habitatMatch = text.match(/Habitat:\s*([^;]+)/i);
+      console.log("Raw response text:", text); // Log the raw response
+
+      // Function to extract a specific section
+      const extractSection = (startMarker: string, endMarkers: string[]) => {
+        const startIndex = text.indexOf(startMarker);
+        if (startIndex === -1) return "N/A";
+
+        let endIndex = text.length;
+        for (const marker of endMarkers) {
+          const potentialEndIndex = text.indexOf(
+            marker,
+            startIndex + startMarker.length,
+          );
+          if (potentialEndIndex !== -1) {
+            endIndex = Math.min(endIndex, potentialEndIndex);
+          }
+        }
+
+        return text
+          .slice(startIndex + startMarker.length, endIndex)
+          .replace(/\*\*/g, "")
+          .replace(/\*/g, "")
+          .trim();
+      };
+
+      // Extract English sections
+      const englishSections = {
+        scientificName: extractSection("Scientific Name:", [
+          "2) Common Name:",
+          "Telugu Translation:",
+          "5) Telugu Scientific Name:",
+        ]),
+        commonName: extractSection("Common Name:", [
+          "3) Brief Description:",
+          "Telugu Translation:",
+          "6) Telugu Common Name:",
+        ]),
+        description: extractSection("Brief Description:", [
+          "4) Habitat:",
+          "Telugu Translation:",
+          "7) Telugu Description:",
+        ]),
+        habitat: extractSection("Habitat:", [
+          "Telugu Translation:",
+          "8) Telugu Habitat:",
+        ]),
+      };
+
+      // Extract Telugu sections with new specific markers
+      const teluguSections = {
+        teluguScientificName: extractSection("5) Telugu Scientific Name:", [
+          "6) Telugu Common Name:",
+        ]),
+        teluguCommonName: extractSection("6) Telugu Common Name:", [
+          "7) Telugu Description:",
+        ]),
+        teluguDescription: extractSection("7) Telugu Description:", [
+          "8) Telugu Habitat:",
+        ]),
+        teluguHabitat: extractSection("8) Telugu Habitat:", []),
+      };
 
       return {
-        scientificName: scientificNameMatch
-          ? scientificNameMatch[1].trim()
-          : "Unknown",
-        commonName: commonNameMatch
-          ? commonNameMatch[1].trim()
-          : "Unknown Plant",
-        description: descriptionMatch
-          ? descriptionMatch[1].trim()
-          : "No description available",
-        habitat: habitatMatch ? habitatMatch[1].trim() : "Not specified",
+        ...englishSections,
+        ...teluguSections,
       };
     };
 

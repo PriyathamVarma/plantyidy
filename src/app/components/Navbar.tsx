@@ -9,7 +9,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center space-x-3 group">
           <Leaf className="h-8 w-8 text-green-600 group-hover:rotate-6 transition-transform" />
           <span className="text-2xl font-bold text-green-900 tracking-tight">
-            LeafScan
+            Vruksha Vidya
           </span>
         </Link>
         <div className="flex items-center space-x-6">

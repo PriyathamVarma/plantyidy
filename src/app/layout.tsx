@@ -7,7 +7,7 @@ import { ReactNode } from "react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "LeafScan | Plant Identifier",
+  title: "Vrukshya Vidya | Plant Identifier",
   description: "AI-powered plant identification and care companion",
 };
 

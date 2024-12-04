@@ -10,11 +10,12 @@ export default function IdentificationUploader() {
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<IDResult | null>(null);
+  const [showTelugu, setShowTelugu] = useState(false);
 
   const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const file = event.target.files?.[0]; // Add optional chaining
+    const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -33,15 +34,20 @@ export default function IdentificationUploader() {
       const response = await fetch("/api/identify", {
         method: "POST",
         body: JSON.stringify({ image }),
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
       const data: IDResult = await response.json();
+      console.log("Received identification result:", data); // Debugging log
       setResult(data);
     } catch (error) {
       console.error("Plant identification error:", error);
     }
+    setLoading(false);
+  };
+
+  const resetHandler = () => {
+    setImage(null);
+    setResult(null);
     setLoading(false);
   };
 
@@ -70,8 +76,8 @@ export default function IdentificationUploader() {
               <Image
                 src={image}
                 alt="Uploaded plant"
-                width={512} // Replace with your desired width
-                height={256} // Replace with your desired height
+                width={512}
+                height={256}
                 className="object-cover rounded-xl mb-4 shadow-md group-hover:scale-105 transition"
               />
             ) : (
@@ -89,48 +95,83 @@ export default function IdentificationUploader() {
         </label>
 
         {image && (
-          <button
-            onClick={identifyPlant}
-            disabled={loading}
-            className="mt-6 bg-green-600 text-white px-8 py-3 rounded-xl 
-            hover:bg-green-700 transition flex items-center space-x-2 
-            focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 animate-spin" />
-                Identifying Plant...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-5 w-5" />
-                <span>Identify Plant</span>
-                <Sparkles className="h-5 w-5" />
-              </>
-            )}
-          </button>
+          <div className="flex space-x-4 mt-6">
+            <button
+              onClick={identifyPlant}
+              disabled={loading}
+              className="bg-green-600 text-white px-8 py-3 rounded-xl hover:bg-green-700 transition flex items-center space-x-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 animate-spin" />
+                  Identifying Plant...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-5 w-5" />
+                  <span>Identify Plant</span>
+                  <Sparkles className="h-5 w-5" />
+                </>
+              )}
+            </button>
+            <button
+              onClick={resetHandler}
+              className="bg-gray-300 text-gray-800 px-8 py-3 rounded-xl hover:bg-gray-400 transition"
+            >
+              Reset
+            </button>
+          </div>
         )}
 
         {result && (
           <div className="mt-8 w-full max-w-md bg-green-50 p-6 rounded-2xl shadow-md">
-            <h3 className="text-2xl font-bold text-green-900 mb-4 flex items-center space-x-2">
-              <Sparkles className="text-green-600" />
-              <span>Identification Result</span>
+            <h3 className="text-2xl font-bold text-green-900 mb-4">
+              Identification Result
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
                 <p className="text-lg font-semibold text-green-800">
-                  Plant Name
+                  Scientific Name:
                 </p>
-                <p className="text-green-700">{result.commonName}</p>
+                <p className="text-green-700">
+                  {showTelugu
+                    ? result.teluguScientificName
+                    : result.scientificName || "N/A"}
+                </p>
               </div>
               <div>
                 <p className="text-lg font-semibold text-green-800">
-                  Description
+                  Common Name:
                 </p>
-                <p className="text-green-700">{result.description}</p>
+                <p className="text-green-700">
+                  {showTelugu
+                    ? result.teluguCommonName
+                    : result.commonName || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-green-800">
+                  Description:
+                </p>
+                <p className="text-green-700">
+                  {showTelugu
+                    ? result.teluguDescription
+                    : result.description || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-green-800">Habitat:</p>
+                <p className="text-green-700">
+                  {showTelugu ? result.teluguHabitat : result.habitat || "N/A"}
+                </p>
               </div>
             </div>
+            <button
+              onClick={() => setShowTelugu(!showTelugu)}
+              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600 transition"
+            >
+              {showTelugu ? "Show in English" : "Show in Telugu"}
+            </button>
           </div>
         )}
       </div>
