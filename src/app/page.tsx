@@ -1,5 +1,5 @@
 // app/page.js
-import PlantGuide from "./components/PlantGuide";
+
 import IdentificationUploader from "./components/IdentificationUploader";
 
 export default function Home() {
