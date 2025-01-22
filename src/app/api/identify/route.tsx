@@ -16,9 +16,7 @@ export async function POST(request: NextRequest) {
     if (!process.env.GEMINI_API_KEY) {
       console.error("Gemini API key is missing");
       return NextResponse.json(
-        {
-          error: "Gemini API key is not configured",
-        },
+        { error: "Gemini API key is not configured" },
         { status: 500 },
       );
     }
@@ -36,31 +34,31 @@ export async function POST(request: NextRequest) {
       {
         inlineData: {
           mimeType: "image/jpeg",
-          data: image.split(",")[1], // Remove data URL prefix
+          data: image.split(",")[1], // Extract the base64 data
         },
       },
     ];
 
     console.log("Identifying plant: Step 5 - Image parts prepared");
 
-    // Generate content with English and Telugu response
+    // Generate content
     const result = await model.generateContent({
       contents: [
         {
           role: "user",
           parts: [
             {
-              text: `Identify this plant scientifically. Provide the following in a clear format:
+              text: `Identify this plant scientifically. Provide the following details in a clear format:
                 1) Scientific Name
                 2) Common Name
                 3) Brief Description
                 4) Habitat
-                
-                Also, translate the above information into Telugu and provide in a clear format:
-                5) Telugu Scientific Name
-                6) Telugu Common Name
-                7) Telugu Description
-                8) Telugu Habitat`,
+                5) Suitable soils
+                6) Sunlight requirements
+                7) Pesticides requirements
+                8) Uses
+                9) Market in India
+                10) Facts`,
             },
             ...imageParts,
           ],
@@ -70,79 +68,30 @@ export async function POST(request: NextRequest) {
 
     console.log("Identifying plant: Step 6 - Content generation complete");
 
-    // Get the response text
+    // Extract the response text
     const response = result.response;
     const text = response.text();
-
     console.log("Identifying plant: Step 7 - Response received", text);
 
     // Parse the response
     const parseResponse = (text: string) => {
-      console.log("Raw response text:", text); // Log the raw response
-
-      // Function to extract a specific section
-      const extractSection = (startMarker: string, endMarkers: string[]) => {
-        const startIndex = text.indexOf(startMarker);
-        if (startIndex === -1) return "N/A";
-
-        let endIndex = text.length;
-        for (const marker of endMarkers) {
-          const potentialEndIndex = text.indexOf(
-            marker,
-            startIndex + startMarker.length,
-          );
-          if (potentialEndIndex !== -1) {
-            endIndex = Math.min(endIndex, potentialEndIndex);
-          }
-        }
-
-        return text
-          .slice(startIndex + startMarker.length, endIndex)
-          .replace(/\*\*/g, "")
-          .replace(/\*/g, "")
-          .trim();
-      };
-
-      // Extract English sections
-      const englishSections = {
-        scientificName: extractSection("Scientific Name:", [
-          "2) Common Name:",
-          "Telugu Translation:",
-          "5) Telugu Scientific Name:",
-        ]),
-        commonName: extractSection("Common Name:", [
-          "3) Brief Description:",
-          "Telugu Translation:",
-          "6) Telugu Common Name:",
-        ]),
-        description: extractSection("Brief Description:", [
-          "4) Habitat:",
-          "Telugu Translation:",
-          "7) Telugu Description:",
-        ]),
-        habitat: extractSection("Habitat:", [
-          "Telugu Translation:",
-          "8) Telugu Habitat:",
-        ]),
-      };
-
-      // Extract Telugu sections with new specific markers
-      const teluguSections = {
-        teluguScientificName: extractSection("5) Telugu Scientific Name:", [
-          "6) Telugu Common Name:",
-        ]),
-        teluguCommonName: extractSection("6) Telugu Common Name:", [
-          "7) Telugu Description:",
-        ]),
-        teluguDescription: extractSection("7) Telugu Description:", [
-          "8) Telugu Habitat:",
-        ]),
-        teluguHabitat: extractSection("8) Telugu Habitat:", []),
+      const extractField = (field: string) => {
+        const regex = new RegExp(`${field}:\\s*(.*?)(?:\\n|$)`, "i");
+        const match = text.match(regex);
+        return match ? match[1].trim() : "N/A";
       };
 
       return {
-        ...englishSections,
-        ...teluguSections,
+        scientificName: extractField("Scientific Name"),
+        commonName: extractField("Common Name"),
+        description: extractField("Brief Description"),
+        habitat: extractField("Habitat"),
+        SuitableSoils: extractField("Suitable Soils"),
+        SunlightRequirements: extractField("Sunlight Requirements"),
+        PesticidesRequirements: extractField("Pesticides Requirements"),
+        Uses: extractField("Uses"),
+        MarketInIndia: extractField("Market In India"),
+        Facts: extractField("Facts"),
       };
     };
 
@@ -162,7 +111,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Ensure you have the correct export type
+// Ensure the API can handle larger payloads for images
 export const config = {
   api: {
     bodyParser: {

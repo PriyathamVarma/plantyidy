@@ -20,13 +20,6 @@ export default function Navbar() {
             <Scan className="h-5 w-5" />
             <span>Identify</span>
           </Link>
-          <Link
-            href="/guide"
-            className="text-green-800 font-medium hover:text-green-600 transition flex items-center space-x-2"
-          >
-            <Leaf className="h-5 w-5" />
-            <span>Plant Guide</span>
-          </Link>
         </div>
       </div>
     </nav>

@@ -10,7 +10,6 @@ export default function IdentificationUploader() {
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<IDResult | null>(null);
-  const [showTelugu, setShowTelugu] = useState(false);
 
   const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -134,44 +133,64 @@ export default function IdentificationUploader() {
                   Scientific Name:
                 </p>
                 <p className="text-green-700">
-                  {showTelugu
-                    ? result.teluguScientificName
-                    : result.scientificName || "N/A"}
+                  {result.scientificName || "N/A"}
                 </p>
               </div>
               <div>
                 <p className="text-lg font-semibold text-green-800">
                   Common Name:
                 </p>
-                <p className="text-green-700">
-                  {showTelugu
-                    ? result.teluguCommonName
-                    : result.commonName || "N/A"}
-                </p>
+                <p className="text-green-700">{result.commonName || "N/A"}</p>
               </div>
               <div>
                 <p className="text-lg font-semibold text-green-800">
                   Description:
                 </p>
-                <p className="text-green-700">
-                  {showTelugu
-                    ? result.teluguDescription
-                    : result.description || "N/A"}
-                </p>
+                <p className="text-green-700">{result.description || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-green-800">Habitat:</p>
+                <p className="text-green-700">{result.habitat || "N/A"}</p>
               </div>
               <div>
                 <p className="text-lg font-semibold text-green-800">Habitat:</p>
                 <p className="text-green-700">
-                  {showTelugu ? result.teluguHabitat : result.habitat || "N/A"}
+                  {result.SuitableSoils || "N/A"}
                 </p>
               </div>
+              <div>
+                <p className="text-lg font-semibold text-green-800">
+                  Sunlight Requirements:
+                </p>
+                <p className="text-green-700">
+                  {result.SunlightRequirements || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-green-800">
+                  Pesticides Requirements:
+                </p>
+                <p className="text-green-700">
+                  {result.PesticidesRequirements || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-green-800">Uses:</p>
+                <p className="text-green-700">{result.Uses || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-green-800">
+                  Market In India:
+                </p>
+                <p className="text-green-700">
+                  {result.MarketInIndia || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-green-800">Facts:</p>
+                <p className="text-green-700">{result.Facts || "N/A"}</p>
+              </div>
             </div>
-            <button
-              onClick={() => setShowTelugu(!showTelugu)}
-              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600 transition"
-            >
-              {showTelugu ? "Show in English" : "Show in Telugu"}
-            </button>
           </div>
         )}
       </div>

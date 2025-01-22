@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import { ReactNode } from "react";
+import InstagramCard from "./components/InstagramCard";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,9 +23,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <main className="flex-grow container mx-auto px-4 py-8 max-w-6xl">
             {children}
           </main>
+          <div className="container mx-auto max-w-6xl my-8">
+            <InstagramCard /> {/* Add the Instagram card */}
+          </div>
           <footer className="bg-white/50 backdrop-blur-md py-6 border-t border-green-100">
             <div className="container mx-auto max-w-6xl flex justify-between items-center">
-              <p className="text-green-800 font-medium">© 2024 LeafScan</p>
+              <p className="text-green-800 font-medium">
+                © 2024 Varma_the_farmer
+              </p>
               <div className="space-x-4 text-green-700">
                 <a href="#" className="hover:text-green-900 transition">
                   Privacy

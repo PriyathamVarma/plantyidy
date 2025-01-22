@@ -1,10 +1,12 @@
 // Interface for the identification result
 
 export interface IDResult {
-  teluguScientificName: string;
-  teluguHabitat: string;
-  teluguDescription: string;
-  teluguCommonName: string;
+  SuitableSoils: string;
+  SunlightRequirements: string;
+  PesticidesRequirements: string;
+  Uses: string;
+  MarketInIndia: string;
+  Facts: string;
   scientificName: string;
   commonName: string;
   description: string;
